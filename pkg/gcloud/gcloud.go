@@ -12,6 +12,7 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/container/v1"
+	"google.golang.org/api/iam/v1"
 	"google.golang.org/api/iterator"
 )
 
@@ -195,6 +196,84 @@ func listGKEClusters(done <-chan interface{}, pc <-chan Project) []GKECluster {
 	return clusters
 }
 
+func listServiceAccounts(done <-chan interface{}, pc <-chan Project) []ServiceAccount {
+	// consoleBaseURL := "https://console.cloud.google.com/kubernetes/clusters/details"
+	// clusterURL := fmt.Sprintf("%v/%v/%v/?project=%v\n", consoleBaseURL, cluster.Location, cluster.Name, s.Text)
+	var serviceAccounts []ServiceAccount
+
+	ctx := context.Background()
+
+	c, err := google.DefaultClient(ctx, iam.CloudPlatformScope)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	iamService, err := iam.New(c)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for p := range pc {
+		project_name := fmt.Sprintf("projects/%s", p.ProjectId)
+
+		req := iamService.Projects.ServiceAccounts.List(project_name)
+		if err := req.Pages(ctx, func(page *iam.ListServiceAccountsResponse) error {
+			for _, serviceAccount := range page.Accounts {
+				sa := new(ServiceAccount)
+				sa.Id = serviceAccount.UniqueId
+				sa.ProjectId = serviceAccount.ProjectId
+				sa.Email = serviceAccount.Email
+				sa.Disabled = serviceAccount.Disabled
+				serviceAccounts = append(serviceAccounts, *sa)
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+			break
+		}
+	}
+
+	return serviceAccounts
+}
+
+// gcloud projects get-iam-policy $PROJECT_ID
+func listIAMPolicies(done <-chan interface{}, pc <-chan Project) []IAMPolicyBinding {
+	var IAMPolicyBindings []IAMPolicyBinding
+
+	ctx := context.Background()
+
+	c, err := google.DefaultClient(ctx, cloudresourcemanager.CloudPlatformScope)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cloudresourcemanagerService, err := cloudresourcemanager.New(c)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rb := &cloudresourcemanager.GetIamPolicyRequest{}
+
+	for p := range pc {
+		resp, err := cloudresourcemanagerService.Projects.GetIamPolicy(p.ProjectId, rb).Context(ctx).Do()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for b := range resp.Bindings {
+			ipb := new(IAMPolicyBinding)
+
+			ipb.ProjectId = p.ProjectId
+			ipb.Role = resp.Bindings[b].Role
+			ipb.Members = resp.Bindings[b].Members
+
+			IAMPolicyBindings = append(IAMPolicyBindings, *ipb)
+		}
+	}
+
+	return IAMPolicyBindings
+}
+
 func GetProjects(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -227,4 +306,31 @@ func GetBuckets(w http.ResponseWriter, r *http.Request) {
 	buckets := listBuckets(done, pc)
 
 	json.NewEncoder(w).Encode(buckets)
+}
+
+// gcloud iam service-accounts list
+func GetServiceAccounts(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	projects := listProjects()
+	done := make(chan interface{})
+	defer close(done)
+	pc := ProjectGenerator(done, *projects...)
+	serviceAccounts := listServiceAccounts(done, pc)
+
+	json.NewEncoder(w).Encode(serviceAccounts)
+}
+
+func GetIamPolicyBindings(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	projects := listProjects()
+	done := make(chan interface{})
+	defer close(done)
+	pc := ProjectGenerator(done, *projects...)
+	iamPolicyBindings := listIAMPolicies(done, pc)
+
+	json.NewEncoder(w).Encode(iamPolicyBindings)
 }

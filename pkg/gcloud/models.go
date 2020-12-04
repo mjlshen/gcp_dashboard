@@ -18,6 +18,24 @@ type GKECluster struct {
 	CurrentNodeVersion   string `json:"currentNodeVersion"`
 }
 
+type ServiceAccount struct {
+	Id        string `json:"uniqueId"`
+	ProjectId string `json:"projectID"`
+	Email     string `json:"email"`
+	Disabled  bool   `json:"disabled"`
+}
+
+type IAMPolicy struct {
+	Member   string             `json:"member"`
+	Bindings []IAMPolicyBinding `json:"bindings"`
+}
+
+type IAMPolicyBinding struct {
+	ProjectId string   `json:"projectID"`
+	Role      string   `json:"role"`
+	Members   []string `json:"members"`
+}
+
 type Project struct {
 	ProjectId string `json:"projectId"`
 	Number    int64  `json:"id"`

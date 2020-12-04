@@ -38,6 +38,8 @@ func Router() *mux.Router {
 	router.HandleFunc("/api/v1/gcloud/buckets", gcloud.GetBuckets).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/v1/gcloud/projects", gcloud.GetProjects).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/v1/gcloud/clusters", gcloud.GetGKEClusters).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/gcloud/serviceAccounts", gcloud.GetServiceAccounts).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/v1/gcloud/iam", gcloud.GetIamPolicyBindings).Methods("GET", "OPTIONS")
 	// router.HandleFunc("/api/task", middleware.CreateTask).Methods("POST", "OPTIONS")
 	// router.HandleFunc("/api/task/{id}", middleware.TaskComplete).Methods("PUT", "OPTIONS")
 	// router.HandleFunc("/api/undoTask/{id}", middleware.UndoTask).Methods("PUT", "OPTIONS")
