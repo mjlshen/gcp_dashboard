@@ -34,7 +34,6 @@ func main() {
 func Router() *mux.Router {
 
 	router := mux.NewRouter()
-
 	router.HandleFunc("/api/v1/gcloud/buckets", gcloud.GetBuckets).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/v1/gcloud/projects", gcloud.GetProjects).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/v1/gcloud/clusters", gcloud.GetGKEClusters).Methods("GET", "OPTIONS")

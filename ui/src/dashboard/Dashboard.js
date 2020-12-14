@@ -25,6 +25,7 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import Projects from '../gcloud/Projects';
 import Clusters from '../gcloud/Clusters';
 import Buckets from '../gcloud/Buckets';
+import IAM from '../gcloud/IAM';
 // Sidebar
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -147,6 +148,9 @@ export default function Dashboard() {
   const showBuckets = () => {
     setGcloudData('buckets')
   }
+  const showIAM = () => {
+    setGcloudData('iam')
+  }
 
   return (
     <div className={classes.root}>
@@ -204,6 +208,12 @@ export default function Dashboard() {
           </ListItemIcon>
           <ListItemText primary="GKE" />
         </ListItem>
+        <ListItem onClick={showIAM} button>
+          <ListItemIcon>
+            <ViewQuiltIcon />
+          </ListItemIcon>
+          <ListItemText primary="GKE" />
+        </ListItem>
     </div>
         {/* <List>{mainListItems}</List> */}
         {/* <Divider /> */}
@@ -218,6 +228,7 @@ export default function Dashboard() {
                 {gcloudData == 'projects' && <Projects />}
                 {gcloudData == 'clusters' && <Clusters />}
                 {gcloudData == 'buckets' && <Buckets />}
+                {gcloudData == 'iam' && <IAM />}
               </Paper>
             </Grid>
           </Grid>
