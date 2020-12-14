@@ -25,15 +25,14 @@ type ServiceAccount struct {
 	Disabled  bool   `json:"disabled"`
 }
 
-type IAMPolicy struct {
-	Member   string             `json:"member"`
-	Bindings []IAMPolicyBinding `json:"bindings"`
+type IAMPolicyBinding struct {
+	Role    string   `json:"role"`
+	Members []string `json:"members"`
 }
 
-type IAMPolicyBinding struct {
-	ProjectId string   `json:"projectID"`
-	Role      string   `json:"role"`
-	Members   []string `json:"members"`
+type IAMPolicy struct {
+	ProjectId         string             `json:"projectID"`
+	IAMPolicyBindings []IAMPolicyBinding `json:"iamPolicyBindings"`
 }
 
 type Project struct {

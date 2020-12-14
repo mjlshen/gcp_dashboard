@@ -237,8 +237,8 @@ func listServiceAccounts(done <-chan interface{}, pc <-chan Project) []ServiceAc
 }
 
 // gcloud projects get-iam-policy $PROJECT_ID
-func listIAMPolicies(done <-chan interface{}, pc <-chan Project) []IAMPolicyBinding {
-	var IAMPolicyBindings []IAMPolicyBinding
+func listIAMPolicies(done <-chan interface{}, pc <-chan Project) []IAMPolicy {
+	var IAMPolicies []IAMPolicy
 
 	ctx := context.Background()
 
@@ -260,22 +260,26 @@ func listIAMPolicies(done <-chan interface{}, pc <-chan Project) []IAMPolicyBind
 			log.Fatal(err)
 		}
 
+		ip := new(IAMPolicy)
+		ip.ProjectId = p.ProjectId
+
 		for b := range resp.Bindings {
 			ipb := new(IAMPolicyBinding)
 
-			ipb.ProjectId = p.ProjectId
 			ipb.Role = resp.Bindings[b].Role
 			ipb.Members = resp.Bindings[b].Members
 
-			IAMPolicyBindings = append(IAMPolicyBindings, *ipb)
+			ip.IAMPolicyBindings = append(ip.IAMPolicyBindings, *ipb)
 		}
+
+		IAMPolicies = append(IAMPolicies, *ip)
 	}
 
-	return IAMPolicyBindings
+	return IAMPolicies
 }
 
 func GetProjects(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	projects := listProjects()
@@ -283,7 +287,7 @@ func GetProjects(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetGKEClusters(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	projects := listProjects()
@@ -296,7 +300,7 @@ func GetGKEClusters(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetBuckets(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	projects := listProjects()
@@ -310,7 +314,7 @@ func GetBuckets(w http.ResponseWriter, r *http.Request) {
 
 // gcloud iam service-accounts list
 func GetServiceAccounts(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	projects := listProjects()
@@ -323,7 +327,7 @@ func GetServiceAccounts(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetIamPolicyBindings(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	projects := listProjects()
