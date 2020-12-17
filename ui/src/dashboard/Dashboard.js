@@ -31,6 +31,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ViewQuiltIcon from '@material-ui/icons/ViewQuilt';
+import SecurityIcon from '@material-ui/icons/Security';
 import AccountTreeIcon from '@material-ui/icons/AccountTree';
 import StorageIcon from '@material-ui/icons/Storage';
 
@@ -210,9 +211,9 @@ export default function Dashboard() {
         </ListItem>
         <ListItem onClick={showIAM} button>
           <ListItemIcon>
-            <ViewQuiltIcon />
+            <SecurityIcon/>
           </ListItemIcon>
-          <ListItemText primary="GKE" />
+          <ListItemText primary="IAM" />
         </ListItem>
     </div>
         {/* <List>{mainListItems}</List> */}
